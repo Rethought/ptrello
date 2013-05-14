@@ -85,11 +85,23 @@ def parformat(s, line_len=80, split_str='\n'):
     return " ".join(new_tokens)
 
 
+def pluralise(root, testval, singular, plural):
+    """
+    Rather than get i18n to work, here we test testval
+    to be > 1 and if so append plural to `root`, otherwise
+    append singular.
+    """
+    if testval > 1:
+        return root+plural
+    return root+singular
+
+
 def render(data, suffix='text', title='Stories'):
     """
     Render the dataset with template suggested by suffix
     """
-    filters = dict(strip=strip, parformat=parformat, subst=subst)
+    filters = dict(strip=strip, parformat=parformat, subst=subst,
+                   pluralise=pluralise)
     jinja_env.filters.update(filters)
     filename = TEMPLATES[suffix]
     template = jinja_env.get_template(filename)

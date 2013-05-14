@@ -59,7 +59,8 @@
 
     <div class="container">
         {% for list in lists %}
-        <h3>{{ list.name }}</h3>
+        {% set count=list.cards|length %}
+        <h3>{{ list.name }} | {{ count }} {{ "stor"|pluralise(count, "y", "ies") }}</h3>
         <div class="row list">
             <div class="span12">
             {% for card in list.cards %}
