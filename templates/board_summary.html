@@ -47,7 +47,9 @@
             <div class="row card">
                 <div class="span12">
                     <div class="row story_head">
-                        <div class="span1">Story #{{ card.idShort }}</div>
+                        <div class="span1">
+                            <a href="{{ card.url }}" target="_blank">Story #{{ card.idShort }}</a>
+                        </div>
                         <div class="span9 story_name">{{ card.name }}</div> 
                     </div>
                     {% if card.desc %}
