@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{{ title }}</title>
+        <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"/>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"> </script>
+        <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"> </script>
+        <style>
+            .board {
+                border: 1px solid #ccc;
+                background: #fdd;
+            }
+            .card {
+                background: #dfd;
+                padding-top: 5px;
+                padding-bottom: 5px;
+                border-top: 1px solid #ccc;
+            }
+            .story_head {
+                font-weight: bold;
+                font-size: 110%;
+            }
+            .story_name {
+                font-weight: bold;
+            }
+            .checklist {
+                padding-top: 5px;
+                padding-bottom: 5px;
+            }
+            .detail {
+                padding-top: 5px;
+            }
+
+        </style>
+    </head>
+    <body>
+        <h1>{{ title }}</h1>
+        <div class="row">
+        <div class="span12 board">
+        {% for list in lists %}
+        <h3>{{ list.name }}</h3>
+        <div class="container">
+        <div class="row list">
+            <div class="span12">
+            {% for card in list.cards %}
+            <div class="row card">
+                <div class="span12">
+                    <div class="row story_head">
+                        <div class="span1">Story #{{ card.idShort }}</div>
+                        <div class="span9 story_name">{{ card.name }}</div> 
+                    </div>
+                    {% if card.desc %}
+                    <div class="row story_description">
+                        <div class="span1">&nbsp;</div>
+                        <div class="span10 detail">{{ card.desc|subst("\n","<br>") }}</div>
+                    </div>
+                    {% endif %}
+                    {% for checklist in card.checklists %}
+                    <div class="row checklist">
+                        <div class="span1">&nbsp;</div>
+                        <div class="span2">
+                            {% if checklist.name == "Checklist" %}
+                                Conditions of satisfaction
+                            {% else %}
+                                {{ checklist.name }}
+                            {% endif %}
+                        </div>
+                        <div class="span7">
+                        {% for item in checklist.checkItems %}
+                            {% if item.checked %}
+                                [X]
+                            {% else %}
+                                [_]
+                            {% endif %} {{ item.name }} <br/>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div> <!-- card -->
+            {% endfor %}
+
+          </div>
+        </div> <!-- list -->
+    </div> <!-- container -->
+        {% endfor %}
+    </body>
+</html>
