@@ -25,8 +25,13 @@
                 font-weight: bold;
             }
             .checklist {
-                padding-top: 5px;
-                padding-bottom: 5px;
+                padding-left: 10px;
+            }
+            .checklist .header {
+                font-weight: bold;
+            }
+            .checklist .body {
+                padding-bottom: 10px;
             }
             .detail {
                 padding-top: 5px;
@@ -45,30 +50,31 @@
             <div class="span12">
             {% for card in list.cards %}
             <div class="row card">
-                <div class="span12">
-                    <div class="row story_head">
-                        <div class="span1">
-                            <a href="{{ card.url }}" target="_blank">Story #{{ card.idShort }}</a>
+                <div class="span7">
+                        <div class="row story_head">
+                            <div class="span1">
+                                <a href="{{ card.url }}" target="_blank">Story #{{ card.idShort }}</a>
+                            </div>
+                            <div class="span6 story_name">{{ card.name }}</div> 
                         </div>
-                        <div class="span9 story_name">{{ card.name }}</div> 
+                        {% if card.desc %}
+                        <div class="row story_description">
+                            <div class="span1">&nbsp;</div>
+                            <div class="span6 detail">{{ card.desc|subst("\n","<br>") }}</div>
+                        </div>
+                        {% endif %}
                     </div>
-                    {% if card.desc %}
-                    <div class="row story_description">
-                        <div class="span1">&nbsp;</div>
-                        <div class="span10 detail">{{ card.desc|subst("\n","<br>") }}</div>
-                    </div>
-                    {% endif %}
-                    {% for checklist in card.checklists %}
+                    <div class="span5">
                     <div class="row checklist">
-                        <div class="span1">&nbsp;</div>
-                        <div class="span2">
+                    {% for checklist in card.checklists %}
+                            <div class="header">
                             {% if checklist.name == "Checklist" %}
                                 Conditions of satisfaction
                             {% else %}
                                 {{ checklist.name }}
                             {% endif %}
-                        </div>
-                        <div class="span7">
+                            </div>
+                            <div class="body">
                         {% for item in checklist.checkItems %}
                             {% if item.checked %}
                                 [X]
@@ -76,9 +82,9 @@
                                 [_]
                             {% endif %} {{ item.name }} <br/>
                         {% endfor %}
-                        </div>
                     </div>
                     {% endfor %}
+                    </div>
                 </div>
             </div> <!-- card -->
             {% endfor %}
