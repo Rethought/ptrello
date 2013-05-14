@@ -53,6 +53,13 @@ def strip(s):
     return s.strip()
 
 
+def subst(s, target, replace):
+    """
+    Custom filter to replace all occurences of `target` with `replace`.
+    """
+    return s.replace(target, replace)
+
+
 def parformat(s, line_len=80, split_str='\n'):
     """
     Jinja filter that inserts `split_str` every `line_len` characters
@@ -73,38 +80,46 @@ def parformat(s, line_len=80, split_str='\n'):
     return " ".join(new_tokens)
 
 
-def render(data, suffix='txt'):
+def render(data, suffix='txt', title='Stories'):
     """
     Render the dataset with template suggested by suffix
     """
-    filters = dict(strip=strip, parformat=parformat)
+    filters = dict(strip=strip, parformat=parformat, subst=subst)
     jinja_env.filters.update(filters)
     if suffix == 'text':
         suffix = 'txt'
     template = jinja_env.get_template("board_summary.{}".format(suffix))
-    print(template.render(lists=data))
+    print(template.render(lists=data, title=title))
 
 
-def print_board(tconn, board, suffix='txt', card_filter="", dump=False):
-    lists = get_lists(tconn, board)
-    for lst in lists:
+def print_board(tconn, board, suffix='txt', card_filter="", dump=False,
+                title='Stories', prune=False):
+    inlists = get_lists(tconn, board)
+    outlists = []
+    while inlists:
+        lst = inlists.pop(0)
         lst['cards'] = [augment_card(tconn, card)
                         for card in cards_for_list(tconn, lst['id'])
                         if card['name'].find(card_filter) >= 0]
+        if prune and not lst['cards']:
+            pass
+        else:
+            outlists.append(lst)
+
     if dump:
-        print json.dumps(lists)
+        print json.dumps(outlists)
     else:
-        render(lists, suffix)
+        render(outlists, suffix, title)
 
 
-def load(tconn, input_file, suffix='txt'):
+def load(tconn, input_file, suffix='txt', title='Stories'):
     """
     Load JSON dataset from `input_file` and render with the
     appropriate template.
     """
     with open(input_file, 'rt') as inf:
         data = json.loads(inf.read())
-        render(data, suffix)
+        render(data, suffix, title)
 
 
 if __name__ == '__main__':
@@ -117,9 +132,12 @@ if __name__ == '__main__':
                       help="Display only cards with description containing "
                            "this value")
     parser.add_option('-t', '--type',
-                      default='text',
+                      default='html',
                       choices=['text', 'html'],
                       help="Output format text or html (default: %default)")
+    parser.add_option('', '--title',
+                      default='Trello story board',
+                      help="Set the document title (default: %default)")
     parser.add_option('', '--load',
                       default=None,
                       help="Load a previously dumped data set for rendering")
@@ -127,6 +145,11 @@ if __name__ == '__main__':
                       action="store_true",
                       default=False,
                       help="Dump acquired data as JSON rather than rendering")
+    parser.add_option('', '--prune',
+                      action="store_true",
+                      default=False,
+                      help="Prune out lists with no stories - has no impact "
+                           "with --load (default: %default)")
     parser.add_option('', '--key',
                       default=settings.KEY,
                       help="API key to use (overrides that in settings)")
@@ -140,7 +163,9 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     tconn = trello.Trello(options.key, options.token)
     if options.load:
-        load(tconn, options.load, options.type)
+        load(tconn, options.load, options.type, title=options.title)
     else:
         print_board(tconn, options.board, options.type, options.filter,
-                    dump=options.dump)
+                    title=options.title,
+                    dump=options.dump,
+                    prune=options.prune)

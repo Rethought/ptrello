@@ -30,5 +30,9 @@ Run::
 
 to see the options available to you.
 
+Example usage::
+
+  > ptrello.py --prune --title="My Lovely Board" > stories.html
+
 The ReThought team
 http://www.rethought-solutions.com
