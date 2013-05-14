@@ -1,0 +1,16 @@
+{% for list in lists %}
+LIST: {{ list.name }}
+===============================================================
+    {% for card in list.cards %}
+-- Story #{{ card.idShort }} ------------------------------------------
+{{ card.name|parformat(80) }}
+        {% if card.desc %}
+Description: {{ card.desc }}
+        {% endif %}
+        {% for checklist in card.checklists %}
+CHECKLIST: {% if checklist.name == "Checklist" %}Conditions of satisfaction{% else %}{{ checklist.name }} {% endif %}
+            {% for item in checklist.checkItems %}
+{% if item.checked %}[X]{% else %}[ ]{% endif %} {{ item.name|parformat(75) }} {% endfor %}
+        {% endfor %}
+    {% endfor %}
+{% endfor %}

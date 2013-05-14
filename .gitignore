@@ -1,0 +1,5 @@
+*.pyc
+.*.swp
+settings.py
+# a file used in dev to cache a structure to use on the train!
+response.json
