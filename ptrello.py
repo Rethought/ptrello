@@ -12,6 +12,11 @@ import settings
 
 
 jinja_env = Environment(loader=PackageLoader('trello', 'templates'))
+# map the value of --type to a template
+# keys used to determine valid choices for --type
+TEMPLATES = {'text': 'board_summary.txt',
+             'html': 'board_summary.html',
+             }
 
 
 def get_lists(tconn, board_id):
@@ -80,19 +85,18 @@ def parformat(s, line_len=80, split_str='\n'):
     return " ".join(new_tokens)
 
 
-def render(data, suffix='txt', title='Stories'):
+def render(data, suffix='text', title='Stories'):
     """
     Render the dataset with template suggested by suffix
     """
     filters = dict(strip=strip, parformat=parformat, subst=subst)
     jinja_env.filters.update(filters)
-    if suffix == 'text':
-        suffix = 'txt'
-    template = jinja_env.get_template("board_summary.{}".format(suffix))
+    filename = TEMPLATES[suffix]
+    template = jinja_env.get_template(filename)
     print(template.render(lists=data, title=title))
 
 
-def print_board(tconn, board, suffix='txt', card_filter="", dump=False,
+def print_board(tconn, board, suffix='text', card_filter="", dump=False,
                 title='Stories', prune=False):
     inlists = get_lists(tconn, board)
     outlists = []
@@ -112,7 +116,7 @@ def print_board(tconn, board, suffix='txt', card_filter="", dump=False,
         render(outlists, suffix, title)
 
 
-def load(tconn, input_file, suffix='txt', title='Stories'):
+def load(tconn, input_file, suffix='text', title='Stories'):
     """
     Load JSON dataset from `input_file` and render with the
     appropriate template.
@@ -133,7 +137,7 @@ if __name__ == '__main__':
                            "this value")
     parser.add_option('-t', '--type',
                       default='html',
-                      choices=['text', 'html'],
+                      choices=TEMPLATES.keys(),
                       help="Output format text or html (default: %default)")
     parser.add_option('', '--title',
                       default='Trello story board',
