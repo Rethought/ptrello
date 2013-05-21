@@ -11,23 +11,16 @@ documentation says you can call:
 
 You will be able to do:
 
-   trello.boards(BOARD_ID).lists(FILTER).request()
+   trello.boards[BOARD_ID].lists[FILTER]()
 
-All names and arguments up until `request` get mapped into a URL path. So the
-above becomes:
+All names and arguments get mapped into a URL path. So the above becomes:
  
    /boards/BOARD_ID/lists/FILTER
 
-Note this means you can also write the python as:
+Keyword arguments sent as parameters when making the call get sent as URL
+arguments.
 
-   trello.boards(BOARD_ID)('lists')(FILTER).request()
-
-for example.
-
-Keyword arguments sent to request() get sent as URL arguments.
-
-POST not yet supported but will be done at some point with an `.update()`
-method I think. 
+POST not yet supported but will be done at some point.
 """
 import requests
 import json
@@ -64,13 +57,19 @@ class Trello(object):
         """
         return TrelloCall(self, key)
 
+    def __getitem__(self, key):
+        """
+        Return a TrelloCall wrapper to biuld the request
+        """
+        return TrelloCall(self, key)
+
 
 class TrelloCall(object):
     """
     We want to provide an idiom that maps to the API transparently so that
     you can call:
 
-      $ trello.boards(board_id).cards.request()
+      $ trello.boards[board_id].cards()
 
     and do this in a form that is thread safe. As each term in the
     dotted sequence becomes part of the URL we need to convert that
@@ -81,15 +80,15 @@ class TrelloCall(object):
     the Trello request.
 
     The Trello class will transparently return this from it's __getattr__
-    so from a user perspective it's all quite transparent.
+    or __getitem__ so from a user perspective it's all quite transparent.
 
     You should not store a TrelloCall instance and use multiple times because
     of the simple way it builds arguments. For example, this is an obvious
     failure mode:
 
-      > r = trello.boards("asjflkdsjflkdsajflksaj")
-      > lists = r.lists.request() # OK
-      > cards = r.cards.request() # UH OH - FAIL
+      > r = trello.boards["asjflkdsjflkdsajflksaj"]
+      > lists = r.lists() # OK
+      > cards = r.cards() # UH OH - FAIL
 
     The last call fails because the call made is to the non-sensical
     path `/boards/asjflkdsjflkdsajflksaj/lists/cards/`.
@@ -109,14 +108,12 @@ class TrelloCall(object):
         self.args.append(key)
         return self
 
-    def __call__(self, *args):
-        """
-        The arguments are appended to self.args
-        """
-        self.args.extend(args)
+
+    def __getitem__(self, key):
+        self.args.append(key)
         return self
 
-    def request(self, **kwargs):
+    def __call__(self, **kwargs):
         """
         Make the request to Trello and return the response. **kwargs
         are sent as get args.

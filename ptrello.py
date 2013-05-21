@@ -20,15 +20,15 @@ TEMPLATES = {'text': 'board_summary.txt',
 
 
 def get_lists(tconn, board_id):
-    return tconn.boards(board_id).lists.request()
+    return tconn.boards[board_id].lists()
 
 
 def cards_for_list(tconn, list_id):
-    return tconn.lists(list_id).cards().request()
+    return tconn.lists[list_id].cards()
 
 
 def get_checklist(tconn, c_id):
-    return tconn.checklists(c_id).request()
+    return tconn.checklists[c_id]()
 
 
 def set_checked(checklist):
