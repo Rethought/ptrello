@@ -96,7 +96,7 @@ def pluralise(root, testval, singular, plural):
     return root+singular
 
 
-def render(data, suffix='text', title='Stories'):
+def render(data, suffix='text', title='Stories', highlights=[]):
     """
     Render the dataset with template suggested by suffix
     """
@@ -105,11 +105,11 @@ def render(data, suffix='text', title='Stories'):
     jinja_env.filters.update(filters)
     filename = TEMPLATES[suffix]
     template = jinja_env.get_template(filename)
-    print(template.render(lists=data, title=title))
+    print(template.render(lists=data, title=title, highlights=highlights))
 
 
 def print_board(tconn, board, suffix='text', card_filter="", dump=False,
-                title='Stories', prune=False):
+                title='Stories', prune=False, highlights=[]):
     inlists = get_lists(tconn, board)
     outlists = []
     while inlists:
@@ -125,17 +125,17 @@ def print_board(tconn, board, suffix='text', card_filter="", dump=False,
     if dump:
         print json.dumps(outlists)
     else:
-        render(outlists, suffix, title)
+        render(outlists, suffix, title, highlights=highlights)
 
 
-def load(tconn, input_file, suffix='text', title='Stories'):
+def load(tconn, input_file, suffix='text', title='Stories', highlights=[]):
     """
     Load JSON dataset from `input_file` and render with the
     appropriate template.
     """
     with open(input_file, 'rt') as inf:
         data = json.loads(inf.read())
-        render(data, suffix, title)
+        render(data, suffix, title, highlights=highlights)
 
 
 if __name__ == '__main__':
@@ -175,13 +175,18 @@ if __name__ == '__main__':
     parser.add_option('', '--token',
                       default=settings.TOKEN,
                       help="API token to use (overrides that in settings)")
+    parser.add_option('', '--highlight',
+                      default='',
+                      help="Comma delimited list of story IDs to highlight")
 
     (options, args) = parser.parse_args()
     tconn = trello.Trello(options.key, options.token)
+    highlights = [int(x) for x in options.highlight.split(',') if x]
     if options.load:
-        load(tconn, options.load, options.type, title=options.title)
+        load(tconn, options.load, options.type, title=options.title, highlights=highlights)
     else:
         print_board(tconn, options.board, options.type, options.filter,
                     title=options.title,
                     dump=options.dump,
-                    prune=options.prune)
+                    prune=options.prune,
+                    highlights=highlights)
