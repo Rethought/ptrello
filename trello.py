@@ -14,7 +14,7 @@ You will be able to do:
    trello.boards[BOARD_ID].lists[FILTER]()
 
 All names and arguments get mapped into a URL path. So the above becomes:
- 
+
    /boards/BOARD_ID/lists/FILTER
 
 Keyword arguments sent as parameters when making the call get sent as URL
@@ -107,7 +107,6 @@ class TrelloCall(object):
     def __getattr__(self, key):
         self.args.append(key)
         return self
-
 
     def __getitem__(self, key):
         self.args.append(key)

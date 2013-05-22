@@ -36,3 +36,12 @@ Example usage::
 
 The ReThought team
 http://www.rethought-solutions.com
+
+Tests
+-----
+To run tests you will need to install the requirements from
+`test_requirements.txt` and run:
+
+  > nosetests -v
+
+And a handful of tests will be executed.
