@@ -83,11 +83,13 @@
                 <div class="row story_head">
                   <div class="span1">
                     <a href="{{ card.url }}" target="_blank">Story #{{ card.idShort }}</a>
+                      {% if show_labels %}
                       <div> 
                           {% for label in card.labels %}
                           <div class="label card_tag" style="background-color: {{ label.color }}">{{ label.name }}</div>
                           {% endfor %}
                        </div>
+                       {% endif %}
                   </div>
 
                   <div class="span6 story_name">

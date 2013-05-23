@@ -96,7 +96,7 @@ def pluralise(root, testval, singular, plural):
     return root+singular
 
 
-def render(data, suffix='text', title='Stories', highlights=[]):
+def render(data, suffix='text', title='Stories', highlights=[], labels=False):
     """
     Render the dataset with template suggested by suffix
     """
@@ -105,11 +105,12 @@ def render(data, suffix='text', title='Stories', highlights=[]):
     jinja_env.filters.update(filters)
     filename = TEMPLATES[suffix]
     template = jinja_env.get_template(filename)
-    print(template.render(lists=data, title=title, highlights=highlights))
+    print(template.render(lists=data, title=title, highlights=highlights,
+          show_labels=labels))
 
 
 def print_board(tconn, board, suffix='text', card_filter="", dump=False,
-                title='Stories', prune=False, highlights=[]):
+                title='Stories', prune=False, highlights=[], labels=False):
     inlists = get_lists(tconn, board)
     outlists = []
     while inlists:
@@ -125,17 +126,18 @@ def print_board(tconn, board, suffix='text', card_filter="", dump=False,
     if dump:
         print json.dumps(outlists)
     else:
-        render(outlists, suffix, title, highlights=highlights)
+        render(outlists, suffix, title, highlights=highlights, labels=labels)
 
 
-def load(tconn, input_file, suffix='text', title='Stories', highlights=[]):
+def load(tconn, input_file, suffix='text', title='Stories', highlights=[],
+         labels=False):
     """
     Load JSON dataset from `input_file` and render with the
     appropriate template.
     """
     with open(input_file, 'rt') as inf:
         data = json.loads(inf.read())
-        render(data, suffix, title, highlights=highlights)
+        render(data, suffix, title, highlights=highlights, labels=labels)
 
 
 if __name__ == '__main__':
@@ -178,15 +180,22 @@ if __name__ == '__main__':
     parser.add_option('', '--highlight',
                       default='',
                       help="Comma delimited list of story IDs to highlight")
+    parser.add_option('', '--labels',
+                      default=False,
+                      action="store_true",
+                      help="Display Trello labels in output "
+                           "(default: %default)")
 
     (options, args) = parser.parse_args()
     tconn = trello.Trello(options.key, options.token)
     highlights = [int(x) for x in options.highlight.split(',') if x]
     if options.load:
-        load(tconn, options.load, options.type, title=options.title, highlights=highlights)
+        load(tconn, options.load, options.type, title=options.title,
+             highlights=highlights, labels=options.labels)
     else:
         print_board(tconn, options.board, options.type, options.filter,
                     title=options.title,
                     dump=options.dump,
                     prune=options.prune,
-                    highlights=highlights)
+                    highlights=highlights,
+                    labels=options.labels)
