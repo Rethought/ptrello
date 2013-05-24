@@ -4,6 +4,7 @@ Basic tests of the Trello API wrapper
 from trello import Trello
 from trello import TrelloCall
 from mock import patch
+from nose.tools import assert_equal
 
 
 def fake_request(self, path, **params):
@@ -36,21 +37,21 @@ class TestWrapper(object):
         Test URL construction with attributes
         """
         v = self.trello.path.to.resource
-        assert v.args == ['path', 'to', 'resource']
+        assert_equal(v.args, ['path', 'to', 'resource'])
 
     def test_url_with_items(self):
         """
         Test URL construction with indexing
         """
         v = self.trello.resource['id001']
-        assert v.args == ['resource', 'id001']
+        assert_equal(v.args, ['resource', 'id001'])
 
     def test_url_with_mixed_keys(self):
         """
         Test URL construction with attributes and items
         """
         v = self.trello.path.to.resource['id001']
-        assert v.args == ['path', 'to', 'resource', 'id001']
+        assert_equal(v.args, ['path', 'to', 'resource', 'id001'])
 
     @patch("trello.Trello.request", fake_request)
     def test_call_to_request(self):
@@ -58,7 +59,7 @@ class TestWrapper(object):
         Test parameters sent to Trello.request
         """
         path, params = self.trello.path.to.resource['id001']()
-        assert path == "path/to/resource/id001"
+        assert_equal(path, "path/to/resource/id001")
 
     @patch("trello.Trello.request", fake_request)
     def test_call_to_request_with_params(self):
@@ -66,5 +67,5 @@ class TestWrapper(object):
         Test parameters sent to Trello.request with getargs
         """
         path, params = self.trello.path.to.resource['id001'](a=10, b=20)
-        assert path == "path/to/resource/id001"
-        assert params == dict(a=10, b=20)
+        assert_equal(path, "path/to/resource/id001")
+        assert_equal(params, dict(a=10, b=20))
