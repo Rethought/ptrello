@@ -4,10 +4,13 @@ Test getting trello cards by API and printing
 
 Dirty piece of hackery.
 """
+import sys
 import json
 from optparse import OptionParser
+
 from jinja2 import Environment, PackageLoader
 import trello
+
 import settings
 
 
@@ -105,8 +108,11 @@ def render(data, suffix='text', title='Stories', highlights=[], labels=False):
     jinja_env.filters.update(filters)
     filename = TEMPLATES[suffix]
     template = jinja_env.get_template(filename)
-    print(template.render(lists=data, title=title, highlights=highlights,
-          show_labels=labels))
+    output = template.render(lists=data,
+                             title=title,
+                             highlights=highlights,
+                             show_labels=labels)
+    sys.stdout.write(output.encode('utf-8'))
 
 
 def print_board(tconn, board, suffix='text', card_filter="", dump=False,
