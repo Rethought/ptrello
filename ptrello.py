@@ -19,6 +19,7 @@ jinja_env = Environment(loader=PackageLoader('trello', 'templates'))
 # keys used to determine valid choices for --type
 TEMPLATES = {'text': 'board_summary.txt',
              'html': 'board_summary.html',
+             'shtml': 'board_summary_standalone.html',
              }
 
 
@@ -47,9 +48,14 @@ def set_checked(checklist):
 def augment_card(tconn, card):
     """
     De-normalise some properties, e.g. check lists, into this card record
+
+    Action history also extracted
     """
     card['checklists'] = [set_checked(get_checklist(tconn, cid))
                           for cid in card['idChecklists']]
+    actions = tconn.cards[card['id']].actions()
+    actions = [x for x in actions if 'text' in x['data']]
+    card['actions'] = actions
     return card
 
 
