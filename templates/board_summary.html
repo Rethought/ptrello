@@ -2,16 +2,14 @@
 
 <html lang="en">
 <head>
-  <meta name="generator" content=
-  "HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
-  <meta charset="utf-8">
+  <meta charset="utf-8"/>
 
   <title>{{ title }}</title>
   <meta name="viewport" content=
-  "width=device-width, initial-scale=1.0"><!-- Le styles -->
+  "width=device-width, initial-scale=1.0"/><!-- Le styles -->
   <link href=
   "{% block bootstrapcombinedurl %}//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css{% endblock %}"
-  rel="stylesheet" type="text/css">
+  rel="stylesheet" type="text/css"/>
   <style type="text/css">
       body {
           padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
@@ -66,14 +64,14 @@
     <ul class="nav nav-tabs" id="list_tabs">
         {% for list in lists %}
           {% set count=list.cards|length %}
-          <li><a href="#{{ list.name|subst(" ","_") }}" data-toggle="tab">{{ list.name }} ({{ count }})</a></li>
+          <li><a href="#{{ list.name|subst(" ","_")|subst("(","")|subst(")","")|subst("/","") }}" data-toggle="tab">{{ list.name }} ({{ count }})</a></li>
         {% endfor %}
     </ul>
 
     <div class="tab-content">
       {% for list in lists %}
 
-      <div class="tab-pane{% if loop.first %} active{% endif %}" id="{{ list.name|subst(" ","_") }}">
+      <div class="tab-pane{% if loop.first %} active{% endif %}" id="{{ list.name|subst(" ","_")|subst("(","")|subst(")","")|subst("/","") }}">
         <div class="row list">
           <div class="span12">
             {% for card in list.cards %}
@@ -86,14 +84,14 @@
                       {% if show_labels %}
                       <div> 
                           {% for label in card.labels %}
-                          <div class="label card_tag" style="background-color: {{ label.color }}">{{ label.name }}</div>
+                          <div class="label card_tag" style="background-color: {{ label.color }}">{{ label.name|html_escape }}</div>
                           {% endfor %}
                        </div>
                        {% endif %}
                   </div>
 
                   <div class="span6 story_name">
-                    {{ card.name }}
+                    {{ card.name|html_escape }}
                   </div>
                 </div>
                 {% if card.desc %}
@@ -103,7 +101,7 @@
                   </div>
 
                   <div class="span6 detail">
-                    {{ card.desc|subst("\n","<br>") }}
+                    {{ card.desc|html_escape|subst("\n","<br/>") }}
                   </div>
                 </div>
                 {% endif %}
@@ -114,12 +112,12 @@
                   {% for checklist in card.checklists %}
 
                   <div class="header">
-                    {% if checklist.name == "Checklist" %} Conditions of satisfaction {% else %} {{ checklist.name }} {% endif %}
+                    {% if checklist.name == "Checklist" %} Conditions of satisfaction {% else %} {{ checklist.name|html_escape }} {% endif %}
                   </div>
 
                   <div class="body">
                       {% for item in checklist.checkItems %} 
-                        {% if item.checked %} [X] {% else %} [_] {% endif %} {{ item.name }}<br>
+                        {% if item.checked %} [X] {% else %} [_] {% endif %} {{ item.name|html_escape }}<br/>
                       {% endfor %}
                   </div>
                   {% endfor %}
@@ -133,7 +131,7 @@
                 </div>
                 <div class="span11">
                     {% for action in card.actions %}
-                    {{ action.memberCreator.fullName }}: {{ action.data.text }} <br/>
+                    {{ action.memberCreator.fullName }}: {{ action.data.text|html_escape }} <br/>
                     {% endfor %}
                 </div>
             </div>

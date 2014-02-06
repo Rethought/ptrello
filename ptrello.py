@@ -8,6 +8,7 @@ import sys
 import json
 from optparse import OptionParser
 
+from xml.sax.saxutils import escape
 from jinja2 import Environment, PackageLoader
 import trello
 
@@ -67,6 +68,14 @@ def strip(s):
     return s.strip()
 
 
+def html_escape(s):
+    """
+    Custom filter than HTML escapes the string, e.g. replacing ampersand with
+    entity
+    """
+    return escape(s)
+
+
 def subst(s, target, replace):
     """
     Custom filter to replace all occurences of `target` with `replace`.
@@ -109,7 +118,8 @@ def render(data, suffix='text', title='Stories', highlights=[], labels=False):
     """
     Render the dataset with template suggested by suffix
     """
-    filters = dict(strip=strip, parformat=parformat, subst=subst,
+    filters = dict(strip=strip, html_escape=html_escape,
+                   parformat=parformat, subst=subst,
                    pluralise=pluralise)
     jinja_env.filters.update(filters)
     filename = TEMPLATES[suffix]
