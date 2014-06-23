@@ -4,8 +4,10 @@ Test getting trello cards by API and printing
 
 Dirty piece of hackery.
 """
+import csv
 import sys
 import json
+import StringIO
 from optparse import OptionParser
 
 from xml.sax.saxutils import escape
@@ -22,6 +24,8 @@ TEMPLATES = {'text': 'board_summary.txt',
              'html': 'board_summary.html',
              'shtml': 'board_summary_standalone.html',
              }
+
+OUTPUT_TYPES = ['text', 'html', 'shtml', 'csv']
 
 
 def get_lists(tconn, board_id):
@@ -118,6 +122,14 @@ def render(data, suffix='text', title='Stories', highlights=[], labels=False):
     """
     Render the dataset with template suggested by suffix
     """
+    if suffix == 'csv':
+        render_csv(data, title, labels)
+    else:
+        render_textual(data, suffix, title, highlights, labels)
+
+
+def render_textual(data, suffix='text', title='Stories',
+                   highlights=[], labels=False):
     filters = dict(strip=strip, html_escape=html_escape,
                    parformat=parformat, subst=subst,
                    pluralise=pluralise)
@@ -129,6 +141,29 @@ def render(data, suffix='text', title='Stories', highlights=[], labels=False):
                              highlights=highlights,
                              show_labels=labels)
     sys.stdout.write(output.encode('utf-8'))
+
+
+def render_csv(data, title='Stories', labels=False):
+    strout = StringIO.StringIO()
+    writer = csv.writer(strout, quoting=csv.QUOTE_ALL)
+    for _list in data:
+        writer.writerow([])
+        writer.writerow([_list['name'].encode('utf-8')])
+        writer.writerow(['ID', 'Name', 'Description', 'URL'])
+        cards = _list['cards']
+        if cards:
+            for card in cards:
+# @todo deal with labels
+                writer.writerow(
+                    [card['idShort'],
+                     card['name'].encode('utf-8'),
+                     card['desc'].encode('utf-8'),
+                     card['url'].encode('utf-8'),
+                     ])
+        else:
+            writer.writerow(['No cards in this list'])
+    sys.stdout.write(strout.getvalue())
+#    sys.stdout.write(strout.getvalue().encode('utf-8'))
 
 
 def print_board(tconn, board, suffix='text', card_filter="", dump=False,
@@ -173,8 +208,9 @@ if __name__ == '__main__':
                            "this value")
     parser.add_option('-t', '--type',
                       default='html',
-                      choices=TEMPLATES.keys(),
-                      help="Output format text or html (default: %default)")
+                      choices=OUTPUT_TYPES,
+                      help=("Output format text, (s)html or csv "
+                            "(default: %default)"))
     parser.add_option('', '--title',
                       default='Trello story board',
                       help="Set the document title (default: %default)")
