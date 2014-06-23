@@ -178,10 +178,11 @@ def render_excel(data, title='Stories', labels=False):
     * Sheets are not named - first column header of each sheet is the
       sheet name; value is the story ID.
     """
+    headers = ['ID', 'Name', 'Description', 'URL']
     datasets = []
     for _list in data:
-        headers = [_list['name'], 'Name', 'Description', 'URL']
         ds = tablib.Dataset(headers=headers)
+        ds.append_separator(_list['name'])
         for card in _list['cards']:
             # @todo deal with labels
             ds.append((
