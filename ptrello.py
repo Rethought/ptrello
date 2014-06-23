@@ -13,6 +13,7 @@ from optparse import OptionParser
 from xml.sax.saxutils import escape
 from jinja2 import Environment, PackageLoader
 import trello
+import tablib
 
 import settings
 
@@ -25,7 +26,7 @@ TEMPLATES = {'text': 'board_summary.txt',
              'shtml': 'board_summary_standalone.html',
              }
 
-OUTPUT_TYPES = ['text', 'html', 'shtml', 'csv']
+OUTPUT_TYPES = ['text', 'html', 'shtml', 'csv', 'excel']
 
 
 def get_lists(tconn, board_id):
@@ -124,6 +125,8 @@ def render(data, suffix='text', title='Stories', highlights=[], labels=False):
     """
     if suffix == 'csv':
         render_csv(data, title, labels)
+    elif suffix == 'excel':
+        render_excel(data, title, labels)
     else:
         render_textual(data, suffix, title, highlights, labels)
 
@@ -153,7 +156,7 @@ def render_csv(data, title='Stories', labels=False):
         cards = _list['cards']
         if cards:
             for card in cards:
-# @todo deal with labels
+                # @todo deal with labels
                 writer.writerow(
                     [card['idShort'],
                      card['name'].encode('utf-8'),
@@ -163,7 +166,33 @@ def render_csv(data, title='Stories', labels=False):
         else:
             writer.writerow(['No cards in this list'])
     sys.stdout.write(strout.getvalue())
-#    sys.stdout.write(strout.getvalue().encode('utf-8'))
+
+
+def render_excel(data, title='Stories', labels=False):
+    """
+    Renders to Excel, one sheet per list. This does not output to stdout
+    but to a file named <title>.xls.
+
+    Known issues:
+
+    * Sheets are not named - first column header of each sheet is the
+      sheet name; value is the story ID.
+    """
+    datasets = []
+    for _list in data:
+        headers = [_list['name'], 'Name', 'Description', 'URL']
+        ds = tablib.Dataset(headers=headers)
+        for card in _list['cards']:
+            # @todo deal with labels
+            ds.append((
+                card['idShort'],
+                card['name'].encode('utf-8'),
+                card['desc'].encode('utf-8'),
+                card['url'].encode('utf-8')))
+        datasets.append(ds)
+    book = tablib.Databook(sets=datasets)
+    with open('{}.xls'.format(title), 'wb') as f:
+        f.write(book.xls)
 
 
 def print_board(tconn, board, suffix='text', card_filter="", dump=False,
