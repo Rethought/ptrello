@@ -1,5 +1,8 @@
 language: python
 
+# build on new containerized infrastructure
+sudo: false
+
 python:
   - "2.7"
 
