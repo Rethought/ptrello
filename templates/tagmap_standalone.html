@@ -1,0 +1,56 @@
+{% extends "board_summary.html" %}
+{% block bootstrapcombinedurl %}http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css{% endblock %}
+
+{% block jqueryurl %}http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js" type="text/javascript{% endblock %}
+
+{% block bootstrapurl %}http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js">  </script>
+{% endblock %}
+
+{% block list_header %}
+<span class="float:left;">
+<canvas id="myChart_aggregate" width="100" height="100" style="border-right: 1px solid black;"></canvas>
+</span>
+
+<script type="text/javascript">
+    ctx = document.getElementById("myChart_aggregate").getContext("2d");
+    data = [
+        {% for rec in lists.0.aggregate_tags %}
+        {
+            value: "{{ rec.value }}",
+            color: "{{ rec.color }}",
+            highlight: "{{ rec.highlight }}",
+            label: "{{ rec.label }}"
+        },
+        {% endfor %}
+    ];
+    options = {scaleShowLabels: false};
+    myChartAggregate = new Chart(ctx).PolarArea(data, options);
+</script>
+
+{% for list in lists %}
+    <span class="float:left">
+    <canvas id="myChart_{{ list.name|subst(" ","_")|subst("(","")|subst(")","")|subst("/","") }}" width="100" height="100"></canvas>
+    </span>
+
+    <script type="text/javascript">
+        ctx = document.getElementById("myChart_{{ list.name|subst(" ","_")|subst("(","")|subst(")","")|subst("/","") }}").getContext("2d");
+        data = [
+            {% for rec in list.cards_per_tag %}
+            {
+                value: "{{ rec.value }}",
+                color: "{{ rec.color }}",
+                highlight: "{{ rec.highlight }}",
+                label: "{{ rec.label }}"
+            },
+            {% endfor %}
+        ];
+        options = {scaleShowLabels: false};
+        myChart{{ list.name|subst(" ","_")|subst("(","")|subst(")","")|subst("/","") }} = new Chart(ctx).PolarArea(data, options);
+    </script>
+{% endfor %}
+{% endblock %}
+
+

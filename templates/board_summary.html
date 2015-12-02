@@ -10,6 +10,8 @@
   <link href=
   "{% block bootstrapcombinedurl %}//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css{% endblock %}"
   rel="stylesheet" type="text/css"/>
+  {% block extrajs %}
+  {% endblock %}
   <style type="text/css">
       body {
           padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
@@ -29,9 +31,6 @@
         }
         .story_name {
             font-weight: bold;
-        }
-        .checklist {
-            padding-left: 10px;
         }
         .checklist .header {
             font-weight: bold;
@@ -55,12 +54,18 @@
       <div class="container">
         <button type="button" class="btn btn-navbar" data-toggle=
         "collapse" data-target=".nav-collapse"></button> <a class=
-        "brand" href="#">User Stories: {{ title }}</a>
+        "brand" href="#">{{ title }}</a>
       </div>
     </div>
   </div>
 
   <div class="container">
+    <div class="row list_header">
+        <div class="span12">
+        {% block list_header scoped %}
+        {% endblock %}
+        </div>
+    </div>
     <ul class="nav nav-tabs" id="list_tabs">
         {% for list in lists %}
           {% set count=list.cards|length %}
@@ -77,38 +82,26 @@
             {% for card in list.cards %}
 
             <div class="row card{% if card.idShort in highlights %} highlight{% endif %}">
-              <div class="span7">
-                <div class="row story_head">
-                  <div class="span1">
+                  <div class="span2 story_head">
                     <a href="{{ card.url }}" target="_blank">Story #{{ card.idShort }}</a>
                       {% if show_labels %}
                       <div> 
                           {% for label in card.labels %}
-                          <div class="label card_tag" style="background-color: {{ label.color }}">{{ label.name|html_escape }}</div>
+                          <div class="label card_tag" style="width: 100%; background-color: {{ label.color }};">{{ label.name|html_escape }}</div>
+                          <br/>
                           {% endfor %}
                        </div>
                        {% endif %}
                   </div>
 
-                  <div class="span6 story_name">
-                    {{ card.name|html_escape }}
-                  </div>
-                </div>
+                  <div class="span5">
+                      <div class="story_name">{{ card.name|html_escape }}</div>
                 {% if card.desc %}
-                <div class="row story_description">
-                  <div class="span1">
-                    &nbsp;
-                  </div>
-
-                  <div class="span6 detail">
-                    {{ card.desc|html_escape|subst("\n","<br/>") }}
-                  </div>
-                </div>
+                {{ card.desc|html_escape|subst("\n","<br/>") }}
                 {% endif %}
               </div>
 
-              <div class="span5">
-                <div class="row checklist">
+              <div class="span5 checklist">
                   {% for checklist in card.checklists %}
 
                   <div class="header">
@@ -121,7 +114,6 @@
                       {% endfor %}
                   </div>
                   {% endfor %}
-                </div> <!-- checklist -->
               </div>
             </div><!-- row card -->
             {% if card.actions %}
