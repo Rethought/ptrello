@@ -9,6 +9,7 @@ import sys
 import json
 import StringIO
 from optparse import OptionParser
+from collections import defaultdict
 
 from xml.sax.saxutils import escape
 from jinja2 import Environment, PackageLoader
@@ -24,9 +25,11 @@ jinja_env = Environment(loader=PackageLoader('trello', 'templates'))
 TEMPLATES = {'text': 'board_summary.txt',
              'html': 'board_summary.html',
              'shtml': 'board_summary_standalone.html',
+             'tagmapped': 'tagmap_standalone.html',
              }
 
-OUTPUT_TYPES = ['text', 'html', 'shtml', 'csv', 'excel']
+
+OUTPUT_TYPES = TEMPLATES.keys()
 
 
 def get_lists(tconn, board_id):
@@ -119,10 +122,37 @@ def pluralise(root, testval, singular, plural):
     return root+singular
 
 
+def augment_list_stats(data):
+    """
+    Add summary data to each list: cards per tag.
+    """
+    aggregate = defaultdict(dict)
+    for _list in data:
+        cards_per_tag = defaultdict(dict)
+        for card in _list['cards']:
+            for label in card['labels']:
+                record = cards_per_tag[label['name']]
+                count = record.get('value', 0) + 1
+                record['value'] = count
+                record['color'] = label['color']
+                record['label'] = label['name']
+
+                arec = aggregate[label['name']]
+                count = arec.get('value', 0) +1
+                arec['value'] = count
+                arec['color'] = label['color']
+                arec['label'] = label['name']
+
+        _list['cards_per_tag'] = cards_per_tag.values()
+    data[0]['aggregate_tags'] = aggregate.values()
+    return data
+
+
 def render(data, suffix='text', title='Stories', highlights=[], labels=False):
     """
     Render the dataset with template suggested by suffix
     """
+    data = augment_list_stats(data)
     if suffix == 'csv':
         render_csv(data, title, labels)
     elif suffix == 'excel':
@@ -227,6 +257,17 @@ def load(tconn, input_file, suffix='text', title='Stories', highlights=[],
         render(data, suffix, title, highlights=highlights, labels=labels)
 
 
+def list_boards(tconn, options):
+    """
+    List all boards available to a user
+    """
+    boards = tconn.members["me"].boards()
+    print("ID                        Name")
+    print("------------------------------------------------")
+    for board in boards:
+        print("{}: {}".format(board['id'], board['name']))
+
+
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option('-b', '--board',
@@ -237,12 +278,12 @@ if __name__ == '__main__':
                       help="Display only cards with description containing "
                            "this value")
     parser.add_option('-t', '--type',
-                      default='html',
+                      default='shtml',
                       choices=OUTPUT_TYPES,
-                      help=("Output format text, (s)html or csv "
-                            "(default: %default)"))
+                      help=("Output format text, one of {} "
+                            "(default: %default)".format(OUTPUT_TYPES)))
     parser.add_option('', '--title',
-                      default='Trello story board',
+                      default='User Stories: Trello story board',
                       help="Set the document title (default: %default)")
     parser.add_option('', '--load',
                       default=None,
@@ -273,11 +314,19 @@ if __name__ == '__main__':
                       action="store_true",
                       help="Display Trello labels in output "
                            "(default: %default)")
+    parser.add_option('', '--list-boards',
+                      dest="list_boards",
+                      default=False,
+                      action="store_true",
+                      help="List all boards and board IDs accessible with "
+                           "these credentials")
 
     (options, args) = parser.parse_args()
     tconn = trello.Trello(options.key, options.token)
     highlights = [int(x) for x in options.highlight.split(',') if x]
-    if options.load:
+    if options.list_boards:
+        list_boards(tconn, options)
+    elif options.load:
         load(tconn, options.load, options.type, title=options.title,
              highlights=highlights, labels=options.labels)
     else:

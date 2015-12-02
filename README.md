@@ -18,8 +18,10 @@ dependencies are:
   * requests
 
 Then copy `example_settings.py` to `settings.py` and set values to the
-API keys and tokens you can create  at 
+API keys and tokens you can create  at
 https://trello.com/docs/gettingstarted/index.html#getting-an-application-key
+
+Find other information at https://trello.com/b/cI66RoQS/trello-public-api
 
 Use
 ---
