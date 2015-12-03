@@ -35,6 +35,9 @@ to see the options available to you.
 Example usage::
 
   > ptrello.py --prune --title="My Lovely Board" > stories.html
+
+Discover what boards are available, and what their IDs are::
+
   > ptrello.py --list-boards
 
 Tests
