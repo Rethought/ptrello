@@ -36,8 +36,8 @@ Example usage::
 
   > ptrello.py --prune --title="My Lovely Board" > stories.html
 
-The ReThought team
-http://www.rethought-solutions.com
+  > # what boards do I have, and what are their IDs?
+  > ptrello.py --list-boards
 
 Tests
 -----
@@ -47,3 +47,10 @@ To run tests you will need to install the requirements from
   > nosetests -v
 
 And a handful of tests will be executed.
+
+See [https://travis-ci.org/Rethought/ptrello](https://travis-ci.org/Rethought/ptrello "Travis CI for PTrello") for CI results.
+
+__________________________________
+The ReThought team
+http://www.rethought-solutions.com
+
