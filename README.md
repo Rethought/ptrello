@@ -1,3 +1,5 @@
+![Travis build status](https://travis-ci.org/Rethought/ptrello.svg)
+
 Trello board printer
 ====================
 
